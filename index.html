@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#050611">
+<meta name="description" content="Advanced gesture-controlled 3D particle studio">
+<title>Gesture 3D Studio</title>
+<style>
+:root{--bg:#050611;--panel:rgba(13,17,35,.72);--line:rgba(255,255,255,.13);--text:#f5f7ff;--muted:#9aa4c5;--accent:#ff3ea5;--cyan:#43e8ff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;color:inherit}#scene{position:fixed;inset:0;z-index:0}canvas.webgl{display:block;width:100%;height:100%}.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.1;background-image:radial-gradient(#fff .45px,transparent .6px);background-size:5px 5px;mask-image:linear-gradient(transparent,#000)}.app{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;pointer-events:none;padding:14px;gap:12px}.top,.panel,.bottom,.toast{pointer-events:auto}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.brand,.panel,.bottom,.camera-box,.status{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 45px #0005}.brand{border-radius:18px;padding:12px 15px;display:flex;align-items:center;gap:11px}.logo{width:37px;height:37px;border-radius:12px;background:linear-gradient(135deg,#ff3ea5,#6c5cff 60%,#43e8ff);display:grid;place-items:center;font-size:19px;box-shadow:0 0 25px #a54dff55}.brand h1{font-size:13px;letter-spacing:.16em;margin:0;font-weight:800}.brand p{font-size:11px;color:var(--muted);margin:4px 0 0}.top-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.btn{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#ffffff0b;font-size:12px;transition:.2s}.btn:hover{background:#ffffff19;transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#a52eff,#ed3c9b);border-color:transparent}.btn.active{border-color:#ff69bd;background:#ff3ea525;box-shadow:0 0 16px #ff3ea522}.workspace{display:flex;justify-content:space-between;align-items:flex-start;flex:1;min-height:0;gap:12px}.panel{border-radius:18px;padding:13px;width:218px;max-height:100%;overflow:auto;scrollbar-width:thin;scrollbar-color:#ffffff2b transparent}.panel h2{font-size:10px;color:#9ea9cb;letter-spacing:.17em;text-transform:uppercase;margin:3px 0 11px}.shape-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.shape{border:1px solid var(--line);background:#ffffff06;border-radius:12px;padding:11px 5px;min-height:67px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:11px}.shape .emoji{font-size:21px}.shape.active{border-color:#ff69bd;background:linear-gradient(135deg,#ff3ea526,#655bff21);box-shadow:inset 0 0 18px #ff3ea50b}.divider{height:1px;background:var(--line);margin:14px 0}.colors{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.swatch{height:27px;width:100%;border:2px solid #ffffff30;border-radius:9px;padding:0}.swatch.active{outline:2px solid white;outline-offset:2px}.field{margin:12px 0}.field label{font-size:11px;color:#c2c9e2;display:flex;justify-content:space-between;margin-bottom:8px}.field output{color:#fff;font-variant-numeric:tabular-nums}.field input[type=range]{width:100%;accent-color:#ff54b4}.field select{width:100%;padding:9px;background:#11162b;color:#fff;border:1px solid var(--line);border-radius:10px}.row{display:flex;gap:7px}.row>*{flex:1}.full{width:100%}.status{position:fixed;top:94px;left:50%;transform:translateX(-50%);border-radius:30px;padding:8px 13px;display:flex;align-items:center;gap:8px;font-size:11px;color:#dce4ff;white-space:nowrap;pointer-events:none}.dot{width:7px;height:7px;background:#ffb347;border-radius:50%;box-shadow:0 0 10px currentColor}.dot.live{background:#53f5bb}.bottom{align-self:center;max-width:min(780px,100%);width:max-content;border-radius:18px;padding:10px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}.bottom .btn{min-width:95px}.camera-box{position:fixed;right:14px;bottom:92px;width:150px;aspect-ratio:4/3;border-radius:14px;overflow:hidden;pointer-events:auto}.camera-box video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}.cam-label{position:absolute;left:7px;bottom:6px;font-size:9px;letter-spacing:.12em;background:#0009;padding:4px 6px;border-radius:5px}.cam-off{position:absolute;inset:0;display:grid;place-items:center;background:#0c1021;color:#9aa4c5;font-size:11px;text-align:center;padding:10px}.help{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);font-size:11px;color:#aab3d1;text-align:center;pointer-events:none;text-shadow:0 2px 8px #000}.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-150%);transition:.25s;border-radius:12px;padding:11px 15px;font-size:12px;z-index:10;max-width:90vw}.toast.show{transform:translate(-50%,0)}.modal{position:fixed;inset:0;z-index:20;background:#02030bd9;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-card{max-width:420px;width:100%;padding:22px;border:1px solid var(--line);border-radius:20px;background:#10152a}.modal-card h2{margin-top:0}.modal-card p,.modal-card li{font-size:13px;line-height:1.65;color:#c0c9e5}.modal-card .btn{margin-top:8px}@media(max-width:720px){.app{padding:9px;gap:8px}.brand{padding:9px 10px}.logo{width:32px;height:32px}.brand h1{font-size:11px}.brand p{font-size:10px}.top-actions .btn{padding:9px;font-size:11px}.workspace{align-items:flex-start}.panel{width:158px;padding:9px;border-radius:14px}.panel h2{font-size:9px}.shape-grid{gap:5px}.shape{min-height:57px;padding:8px 2px;font-size:10px}.shape .emoji{font-size:18px}.divider{margin:10px 0}.colors{gap:6px}.swatch{height:23px}.field{margin:10px 0}.field label{font-size:10px}.camera-box{width:112px;right:9px;bottom:106px}.status{top:76px;font-size:10px;padding:7px 10px}.bottom{width:100%;gap:5px;padding:7px;border-radius:14px}.bottom .btn{min-width:0;flex:1;padding:9px 5px;font-size:10px}.help{bottom:85px;width:calc(100% - 20px);font-size:10px}.bottom{margin-bottom:0}}@media(max-height:620px){.panel{max-height:64vh}.status{display:none}.camera-box{width:105px;bottom:78px}.bottom .btn{padding:7px 5px}.brand p{display:none}}
+</style>
+</head>
+<body>
+<div id="scene"></div><div class="grain"></div>
+<div class="app">
+ <header class="top">
+  <div class="brand"><div class="logo">✦</div><div><h1>GESTURE 3D STUDIO</h1><p>Move your hands. Shape the universe.</p></div></div>
+  <div class="top-actions"><button class="btn primary" id="cameraBtn">◎ Start Camera</button><button class="btn" id="helpBtn">? Guide</button><button class="btn" id="fullBtn">⛶</button></div>
+ </header>
+ <div class="workspace">
+  <aside class="panel">
+   <h2>Particle forms</h2>
+   <div class="shape-grid" id="shapes">
+    <button class="shape active" data-shape="heart"><span class="emoji">💗</span>Heart</button>
+    <button class="shape" data-shape="saturn"><span class="emoji">🪐</span>Saturn</button>
+    <button class="shape" data-shape="flower"><span class="emoji">✿</span>Flower</button>
+    <button class="shape" data-shape="galaxy"><span class="emoji">🌌</span>Galaxy</button>
+    <button class="shape" data-shape="spiral"><span class="emoji">🌀</span>Spiral</button>
+    <button class="shape" data-shape="fireworks"><span class="emoji">✺</span>Fireworks</button>
+    <button class="shape" data-shape="sphere"><span class="emoji">◉</span>Sphere</button>
+    <button class="shape" data-shape="dna"><span class="emoji">🧬</span>DNA</button>
+   </div>
+   <div class="divider"></div><h2>Color spectrum</h2>
+   <div class="colors" id="colors">
+    <button class="swatch active" data-color="#ff3ea5" style="background:#ff3ea5" aria-label="Pink"></button><button class="swatch" data-color="#43e8ff" style="background:#43e8ff" aria-label="Cyan"></button><button class="swatch" data-color="#a66bff" style="background:#a66bff" aria-label="Purple"></button><button class="swatch" data-color="#ffd166" style="background:#ffd166" aria-label="Gold"></button><button class="swatch" data-color="#f5f7ff" style="background:#f5f7ff" aria-label="White"></button><button class="swatch" data-color="#58f6a9" style="background:#58f6a9" aria-label="Mint"></button><button class="swatch" data-color="#ff674d" style="background:#ff674d" aria-label="Orange"></button><button class="swatch" data-color="rainbow" style="background:conic-gradient(#ff3ea5,#ffd166,#58f6a9,#43e8ff,#a66bff,#ff3ea5)" aria-label="Rainbow"></button><input id="customColor" type="color" value="#ff3ea5" class="swatch" title="Custom color" aria-label="Custom color">
+   </div>
+   <div class="divider"></div><h2>Particle controls</h2>
+   <div class="field"><label for="count">Particle count <output id="countOut">7,000</output></label><input id="count" type="range" min="1500" max="14000" step="500" value="7000"></div>
+   <div class="field"><label for="size">Particle size <output id="sizeOut">0.12</output></label><input id="size" type="range" min="4" max="30" value="12"></div>
+   <div class="field"><label for="speed">Animation speed <output id="speedOut">1.0×</output></label><input id="speed" type="range" min="1" max="25" value="10"></div>
+   <div class="field"><label for="glow">Glow intensity <output id="glowOut">80%</output></label><input id="glow" type="range" min="20" max="100" value="80"></div>
+   <div class="field"><label for="gestureMode">Gesture response</label><select id="gestureMode"><option value="all">All gestures</option><option value="scale">Scale only</option><option value="rotate">Rotate only</option><option value="none">Auto animation</option></select></div>
+   <div class="row"><button class="btn full" id="resetBtn">↺ Reset</button><button class="btn full" id="pauseBtn">Ⅱ Pause</button></div>
+  </aside>
+  <div style="flex:1;min-width:0"></div>
+  <aside class="panel" style="width:190px">
+   <h2>Live interaction</h2>
+   <div style="font-size:12px;color:#cbd4ef;line-height:1.8">Camera status<br><strong id="camState">Not connected</strong></div>
+   <div class="divider"></div>
+   <div class="field"><label>Hands detected</label><strong id="handsState" style="font-size:14px">0</strong></div>
+   <div class="field"><label>Gesture</label><strong id="gestureState" style="font-size:12px">Auto mode</strong></div>
+   <div class="field"><label>Hand openness</label><div style="height:5px;border-radius:9px;background:#ffffff18;overflow:hidden"><div id="openBar" style="height:100%;width:0;background:linear-gradient(90deg,#a66bff,#ff3ea5);transition:width .15s"></div></div></div>
+   <div class="divider"></div>
+   <h2>Quick actions</h2>
+   <button class="btn full" id="burstBtn" style="margin-bottom:7px">✧ Particle burst</button>
+   <button class="btn full" id="autoColorBtn" style="margin-bottom:7px">◉ Rainbow mode</button>
+   <button class="btn full" id="saveBtn">↓ Save snapshot</button>
+  </aside>
+ </div>
+ <div class="help" id="hint">Show your hand to the camera • Move mouse/finger to rotate when camera is off</div>
+ <div class="bottom"><button class="btn" id="prevBtn">← Previous</button><button class="btn" id="nextBtn">Next shape →</button><button class="btn" id="spinBtn">⟳ Spin: On</button><button class="btn" id="centerBtn">◎ Center view</button></div>
+</div>
+<div class="status"><span class="dot" id="statusDot"></span><span id="statusText">PARTICLES ONLINE · CAMERA OFF</span></div>
+<div class="camera-box"><video id="video" playsinline muted></video><div id="camOff" class="cam-off">Camera preview<br>is currently off</div><div class="cam-label">LIVE HAND TRACKING</div></div>
+<div id="toast" class="toast"></div>
+<div id="guide" class="modal"><div class="modal-card"><h2>✦ Gesture guide</h2><p>Allow camera access, then keep your hand clearly visible in the frame.</p><ul><li><b>Open palm:</b> spread particles outward.</li><li><b>Make a fist:</b> pull particles inward.</li><li><b>Move hand left/right or up/down:</b> rotate the 3D form.</li><li><b>Use two hands:</b> move them apart to expand, together to shrink.</li><li><b>No camera:</b> use mouse or touch to rotate the scene.</li></ul><p>Camera processing runs in your browser using MediaPipe. Camera access generally requires HTTPS or localhost.</p><button class="btn primary full" id="closeGuide">Got it</button></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const sceneRoot=$('scene');
+let scene,camera,renderer,points,geometry,material,clock=new THREE.Clock();
+let particleCount=7000,basePositions=new Float32Array(0),colors=new Float32Array(0),velocities=new Float32Array(0);
+let shape='heart',colorMode='solid',baseColor=new THREE.Color('#ff3ea5'),speed=1,size=.12,glow=.8,paused=false,spin=true,burst=0;
+let handCount=0,openness=0,handX=.5,handY=.5,twoHandScale=1,gesture='Auto mode',cameraStream=null,mpHands=null,mpCameraRunning=false;
+let targetRotX=0,targetRotY=0,mouseDown=false,lastX=0,lastY=0,autoHue=0;
+const shapeNames=['heart','saturn','flower','galaxy','spiral','fireworks','sphere','dna'];
+function rand(a,b){return a+Math.random()*(b-a)}
+function spherical(r){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);return [r*s*Math.cos(a),r*u,r*s*Math.sin(a)]}
+function makePoint(i,type){
+ const t=Math.random()*Math.PI*2,u=Math.random()*2-1,r=Math.random(),a=Math.random()*Math.PI*2;let x=0,y=0,z=0;
+ if(type==='heart'){
+  const q=Math.sqrt(r),xx=16*Math.pow(Math.sin(t),3),yy=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+  x=xx*.29*q;y=yy*.29*q;z=rand(-1,1)*2.3*q;
+ }else if(type==='saturn'){
+  if(r>.3){const rr=rand(5.2,9.3);x=Math.cos(a)*rr;z=Math.sin(a)*rr;y=rand(-.15,.15)}else [x,y,z]=spherical(3.4*Math.cbrt(Math.random()));
+ }else if(type==='flower'){
+  const ang=i*2.399963;const rr=6*Math.sqrt(r);x=Math.cos(ang)*rr;z=Math.sin(ang)*rr;y=1.4*Math.cos(rr*1.2)+rand(-.25,.25);
+ }else if(type==='galaxy'){
+  const arm=i%5,rr=9*Math.sqrt(r),ang=rr*.75+arm*Math.PI*2/5+rand(-.28,.28);x=Math.cos(ang)*rr;z=Math.sin(ang)*rr;y=rand(-.65,.65)*Math.pow(1-rr/10,.6);
+ }else if(type==='spiral'){
+  const rr=rand(.2,9);const ang=rr*1.35+rand(-.25,.25);x=Math.cos(ang)*rr;y=rand(-.5,.5);z=Math.sin(ang)*rr;
+ }else if(type==='fireworks'){
+  [x,y,z]=spherical(9*Math.cbrt(Math.random()));
+ }else if(type==='sphere'){
+  [x,y,z]=spherical(7.2*Math.cbrt(Math.random()));
+ }else if(type==='dna'){
+  const yy=rand(-8,8),ang=yy*1.25+(i%2)*Math.PI;x=Math.cos(ang)*2.4;y=yy;z=Math.sin(ang)*2.4;
+  if(Math.random()<.25){const f=rand(-1,1);x*=f;y=yy;z*=f}
+ }
+ return [x,y,z];
+}
+function buildParticles(count){
+ particleCount=count;
+ const old=geometry;
+ geometry=new THREE.BufferGeometry();
+ basePositions=new Float32Array(count*3);const pos=new Float32Array(count*3);colors=new Float32Array(count*3);velocities=new Float32Array(count*3);
+ for(let i=0;i<count;i++){const p=makePoint(i,shape),k=i*3;basePositions.set(p,k);pos.set([rand(-20,20),rand(-20,20),rand(-20,20)],k);velocities[k]=rand(-.03,.03);velocities[k+1]=rand(-.03,.03);velocities[k+2]=rand(-.03,.03);setParticleColor(i);}
+ geometry.setAttribute('position',new THREE.BufferAttribute(pos,3));geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+ material=new THREE.PointsMaterial({size,map:makeGlowTexture(),transparent:true,opacity:glow,vertexColors:true,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true});
+ if(points){scene.remove(points);points.geometry.dispose();points.material.dispose()}
+ points=new THREE.Points(geometry,material);scene.add(points);if(old)old.dispose();
+}
+function setParticleColor(i){
+ const k=i*3;let c=baseColor;
+ if(colorMode==='rainbow'){c=new THREE.Color().setHSL((i/particleCount*.85+autoHue)%1,.9,.62)}
+ colors[k]=c.r;colors[k+1]=c.g;colors[k+2]=c.b;
+}
+function recolor(){for(let i=0;i<particleCount;i++)setParticleColor(i);if(geometry)geometry.attributes.color.needsUpdate=true}
+function makeGlowTexture(){const c=document.createElement('canvas');c.width=c.height=64;const ctx=c.getContext('2d'),g=ctx.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.15,'rgba(255,255,255,.95)');g.addColorStop(.42,'rgba(255,255,255,.25)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);const tex=new THREE.CanvasTexture(c);return tex}
+function init3D(){
+ scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x050611,.012);
+ camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,300);camera.position.z=27;
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.domElement.className='webgl';renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x050611,0);sceneRoot.appendChild(renderer.domElement);
+ scene.add(new THREE.AmbientLight(0xffffff,.5));
+ const starsGeo=new THREE.BufferGeometry(),arr=new Float32Array(1800*3);for(let i=0;i<arr.length;i+=3){arr[i]=rand(-90,90);arr[i+1]=rand(-60,60);arr[i+2]=rand(-100,30)}
+ starsGeo.setAttribute('position',new THREE.BufferAttribute(arr,3));const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({color:0x9aa9ff,size:.12,transparent:true,opacity:.6}));scene.add(stars);scene.userData.stars=stars;
+ buildParticles(particleCount);
+ renderer.domElement.addEventListener('pointerdown',e=>{mouseDown=true;lastX=e.clientX;lastY=e.clientY;renderer.domElement.setPointerCapture?.(e.pointerId)});
+ window.addEventListener('pointerup',()=>mouseDown=false);
+ renderer.domElement.addEventListener('pointermove',e=>{if(mouseDown){targetRotY+=(e.clientX-lastX)*.008;targetRotX+=(e.clientY-lastY)*.008;lastX=e.clientX;lastY=e.clientY}});
+ renderer.domElement.addEventListener('wheel',e=>{camera.position.z=Math.max(12,Math.min(55,camera.position.z+e.deltaY*.025))},{passive:true});
+ window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+}
+function setShape(s){if(!shapeNames.includes(s))return;shape=s;for(let i=0;i<particleCount;i++){const p=makePoint(i,s),k=i*3;basePositions.set(p,k)}document.querySelectorAll('.shape').forEach(b=>b.classList.toggle('active',b.dataset.shape===s));notify('Shape changed: '+s[0].toUpperCase()+s.slice(1))}
+function setColor(c){if(c==='rainbow'){colorMode='rainbow'}else{colorMode='solid';baseColor.set(c)}document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===c));recolor()}
+function notify(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>t.classList.remove('show'),2100)}
+function updateStatus(){const live=!!cameraStream;$('camState').textContent=live?'Camera active':'Not connected';$('camOff').style.display=live?'none':'grid';$('handsState').textContent=handCount;$('gestureState').textContent=gesture;$('openBar').style.width=Math.round(openness*100)+'%';$('statusDot').classList.toggle('live',live);$('statusText').textContent=live?(handCount?'HAND TRACKING ACTIVE':'CAMERA ON · SHOW YOUR HAND'):'PARTICLES ONLINE · CAMERA OFF';$('cameraBtn').textContent=live?'◉ Stop Camera':'◎ Start Camera'}
+async function startCamera(){
+ if(cameraStream){stopCamera();return}
+ if(!navigator.mediaDevices?.getUserMedia){notify('Camera API unavailable. Use HTTPS or a modern browser.');return}
+ try{
+  $('cameraBtn').disabled=true;$('cameraBtn').textContent='Starting…';
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+  const video=$('video');video.srcObject=cameraStream;await video.play();
+  if(typeof Hands==='undefined')throw new Error('MediaPipe could not load. Check your internet connection.');
+  mpHands=new Hands({locateFile:file=>'https://cdn.jsdelivr.net/npm/@mediapipe/hands/'+file});
+  mpHands.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:.55,minTrackingConfidence:.5});
+  mpHands.onResults(onHandResults);mpCameraRunning=true;
+  const loop=async()=>{if(!mpCameraRunning||!mpHands||!video.videoWidth)return;try{await mpHands.send({image:video})}catch(e){}if(mpCameraRunning)requestAnimationFrame(loop)};
+  requestAnimationFrame(loop);updateStatus();notify('Camera started. Show your hand to interact.');
+ }catch(err){stopCamera();notify(err.message||'Could not start camera. Check browser permissions.');console.error(err)}
+ finally{$('cameraBtn').disabled=false;updateStatus()}
+}
+function stopCamera(){mpCameraRunning=false;if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null}if(mpHands){mpHands.close?.();mpHands=null}$('video').srcObject=null;handCount=0;openness=0;gesture='Auto mode';updateStatus()}
+function onHandResults(results){
+ const lm=results.multiHandLandmarks||[];handCount=lm.length;
+ if(lm.length){
+  const h=lm[0],wrist=h[0],tips=[h[8],h[12],h[16],h[20]],bases=[h[5],h[9],h[13],h[17]];
+  let total=0;for(let i=0;i<tips.length;i++){const dx=tips[i].x-wrist.x,dy=tips[i].y-wrist.y;total+=Math.sqrt(dx*dx+dy*dy)}
+  openness=Math.max(0,Math.min(1,(total/4-.18)/.23));
+  handX=1-h[9].x;handY=h[9].y;
+  const mode=$('gestureMode').value;
+  if(mode==='all'||mode==='rotate'){targetRotY=(handX-.5)*2.5;targetRotX=(handY-.5)*2}
+  if(lm.length>=2){const a=lm[0][9],b=lm[1][9],d=Math.hypot(a.x-b.x,a.y-b.y);twoHandScale=Math.max(.55,Math.min(1.8,d/ .35));gesture='Two-hand scale'}
+  else{twoHandScale=1;gesture=openness>.68?'Open palm · Expand':openness<.28?'Fist · Contract':'Hand tracking'}
+  if(mode==='all'||mode==='scale'){/* openness drives expansion in animation */}
+ }else{twoHandScale=1;gesture='Searching for hands'}
+ updateStatus();
+}
+function animate(){
+ requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(paused){renderer.render(scene,camera);return}
+ autoHue=(autoHue+dt*.025*speed)%1;
+ const pos=geometry.attributes.position.array;const mode=$('gestureMode').value;
+ let expand=1;
+ if(handCount&&mode!=='none'&&(mode==='all'||mode==='scale'))expand=.55+openness*1.55;
+ expand*=twoHandScale;
+ const now=clock.elapsedTime||performance.now()*.001;
+ for(let i=0;i<particleCount;i++){
+  const k=i*3;let tx=basePositions[k],ty=basePositions[k+1],tz=basePositions[k+2];
+  if(shape==='fireworks'){const pulse=1+.16*Math.sin(now*3*speed+i*.07)+burst;tx*=pulse;ty*=pulse;tz*=pulse}
+  const noise=shape==='galaxy'?.06:.025;
+  const drift=Math.sin(now*speed+i*.013)*noise;
+  tx=tx*expand+Math.sin(now*speed*.7+i)*drift;
+  ty=ty*expand+Math.cos(now*speed*.8+i*.8)*drift;
+  tz=tz*expand+Math.sin(now*speed*.6+i*.4)*drift;
+  pos[k]+=(tx-pos[k])*Math.min(1,dt*4.2*speed);
+  pos[k+1]+=(ty-pos[k+1])*Math.min(1,dt*4.2*speed);
+  pos[k+2]+=(tz-pos[k+2])*Math.min(1,dt*4.2*speed);
+ }
+ geometry.attributes.position.needsUpdate=true;
+ if(colorMode==='rainbow'&&Math.random()<.12)recolor();
+ if(burst>0)burst=Math.max(0,burst-dt*1.8);
+ if(spin){points.rotation.y+=dt*.12*speed;points.rotation.z+=dt*.035*speed}
+ points.rotation.x+=(targetRotX-points.rotation.x)*Math.min(1,dt*4);
+ if(!handCount)points.rotation.y+=(targetRotY-points.rotation.y)*Math.min(1,dt*2);
+ scene.userData.stars.rotation.y-=dt*.004;
+ renderer.render(scene,camera);
+}
+function cycleShape(dir){let i=shapeNames.indexOf(shape);setShape(shapeNames[(i+dir+shapeNames.length)%shapeNames.length])}
+$('shapes').addEventListener('click',e=>{const b=e.target.closest('[data-shape]');if(b)setShape(b.dataset.shape)});
+$('colors').addEventListener('click',e=>{const b=e.target.closest('[data-color]');if(b)setColor(b.dataset.color)});
+$('customColor').addEventListener('input',e=>setColor(e.target.value));
+$('count').addEventListener('input',e=>{$('countOut').textContent=Number(e.target.value).toLocaleString();buildParticles(Number(e.target.value))});
+$('size').addEventListener('input',e=>{size=Number(e.target.value)/100;$('sizeOut').textContent=size.toFixed(2);material.size=size});
+$('speed').addEventListener('input',e=>{speed=Number(e.target.value)/10;$('speedOut').textContent=speed.toFixed(1)+'×'});
+$('glow').addEventListener('input',e=>{glow=Number(e.target.value)/100;$('glowOut').textContent=e.target.value+'%';material.opacity=glow});
+$('cameraBtn').addEventListener('click',startCamera);
+$('prevBtn').addEventListener('click',()=>cycleShape(-1));$('nextBtn').addEventListener('click',()=>cycleShape(1));
+$('spinBtn').addEventListener('click',()=>{spin=!spin;$('spinBtn').textContent='⟳ Spin: '+(spin?'On':'Off');$('spinBtn').classList.toggle('active',spin)});
+$('centerBtn').addEventListener('click',()=>{targetRotX=targetRotY=0;camera.position.set(0,0,27);notify('View centered')});
+$('resetBtn').addEventListener('click',()=>{speed=1;size=.12;glow=.8;paused=false;spin=true;$('speed').value=10;$('size').value=12;$('glow').value=80;$('speedOut').textContent='1.0×';$('sizeOut').textContent='.12';$('glowOut').textContent='80%';material.size=size;material.opacity=glow;$('pauseBtn').textContent='Ⅱ Pause';$('spinBtn').textContent='⟳ Spin: On';setShape('heart');setColor('#ff3ea5');targetRotX=targetRotY=0;notify('Settings reset')});
+$('pauseBtn').addEventListener('click',()=>{paused=!paused;$('pauseBtn').textContent=paused?'▶ Resume':'Ⅱ Pause';$('pauseBtn').classList.toggle('active',paused)});
+$('burstBtn').addEventListener('click',()=>{burst=1.5;for(let i=0;i<particleCount;i++){const k=i*3;geometry.attributes.position.array[k]+=rand(-1,1)*3;geometry.attributes.position.array[k+1]+=rand(-1,1)*3;geometry.attributes.position.array[k+2]+=rand(-1,1)*3}geometry.attributes.position.needsUpdate=true;notify('Particle burst!')});
+$('autoColorBtn').addEventListener('click',()=>{setColor(colorMode==='rainbow'?'#ff3ea5':'rainbow');$('autoColorBtn').textContent=colorMode==='rainbow'?'◉ Rainbow: On':'◉ Rainbow mode';notify(colorMode==='rainbow'?'Rainbow mode enabled':'Rainbow mode disabled')});
+$('fullBtn').addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){notify('Fullscreen is not supported here')}});
+$('saveBtn').addEventListener('click',()=>{try{renderer.render(scene,camera);const a=document.createElement('a');a.download='gesture-3d-studio.png';a.href=renderer.domElement.toDataURL('image/png');a.click();notify('Snapshot saved')}catch(e){notify('Snapshot could not be saved')}});
+$('helpBtn').addEventListener('click',()=>$('guide').classList.add('show'));$('closeGuide').addEventListener('click',()=>$('guide').classList.remove('show'));$('guide').addEventListener('click',e=>{if(e.target===$('guide'))$('guide').classList.remove('show')});
+let touchX=null;rendererSafeTouch();
+function rendererSafeTouch(){sceneRoot.addEventListener('touchstart',e=>{if(e.touches.length===1){touchX=[e.touches[0].clientX,e.touches[0].clientY]}},{passive:true});sceneRoot.addEventListener('touchmove',e=>{if(touchX&&e.touches.length===1&&!e.target.closest('.panel,.bottom,button,input,select')){const t=e.touches[0];targetRotY+=(t.clientX-touchX[0])*.006;targetRotX+=(t.clientY-touchX[1])*.006;touchX=[t.clientX,t.clientY]}},{passive:true});sceneRoot.addEventListener('touchend',()=>touchX=null,{passive:true})}
+try{init3D();animate();updateStatus()}catch(e){console.error(e);sceneRoot.innerHTML='<div style="padding:30px;color:white">WebGL could not initialize. Try a modern browser with hardware acceleration enabled.</div>'}
+})();
+</script>
+</body>
+</html>
